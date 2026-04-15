@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Temperature Converter</title>
+    <meta name="description"
+        content="A beautifully designed, modern temperature converter. Convert between Celsius, Fahrenheit, and Kelvin.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --accent: #d946ef;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(200, 100%, 90%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(260, 100%, 90%, 0.8) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(320, 100%, 90%, 0.8) 0, transparent 50%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .converter-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .converter-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .converter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 0 0.5rem;
+            font-size: 3rem;
+            color: var(--text-main);
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        /* Hide arrow for number input */
+        .input-group input::-webkit-outer-spin-button,
+        .input-group input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        .input-group input[type=number] {
+          -moz-appearance: textfield;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: var(--primary);
+        }
+
+        .input-group label {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .error-msg {
+            display: block;
+            text-align: center;
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .error-msg.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .select-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .select-wrapper label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .select-wrapper select {
+            appearance: none;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .select-wrapper select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .select-wrapper select option {
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .swap-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
+
+        .swap-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .swap-btn:active {
+            transform: scale(0.9);
+        }
+
+        .convert-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.39);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-area {
+            margin-top: 2.5rem;
+            text-align: center;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease, height 0.5s ease;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0;
+        }
+
+        .result-area.visible {
+            opacity: 1;
+            transform: scale(1);
+            height: 120px;
+            padding-top: 2rem;
+        }
+
+        .result-value {
+            font-size: 4rem;
+            font-weight: 600;
+            line-height: 1;
+            background: linear-gradient(to right, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-unit {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="converter-container">
+        <header>
+            <h1>Temperature</h1>
+            <p>Converter</p>
+        </header>
+
+        <section class="converter-card">
+            <div class="input-group">
+                <input type="number" id="temp-input" placeholder="0" step="any" required>
+                <label for="temp-input">Enter Temperature</label>
+                <span class="error-msg" id="error-msg">Please enter a valid number.</span>
+            </div>
+
+            <div class="controls-group">
+                <div class="select-wrapper">
+                    <label for="from-unit">From</label>
+                    <select id="from-unit">
+                        <option value="celsius">Celsius (°C)</option>
+                        <option value="fahrenheit">Fahrenheit (°F)</option>
+                        <option value="kelvin">Kelvin (K)</option>
+                    </select>
+                </div>
+
+                <button id="swap-btn" class="swap-btn" aria-label="Swap units">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 10L3 14L7 18" />
+                        <path d="M21 14H3" />
+                        <path d="M17 4L21 8L17 12" />
+                        <path d="M3 8H21" />
+                    </svg>
+                </button>
+
+                <div class="select-wrapper">
+                    <label for="to-unit">To</label>
+                    <select id="to-unit">
+                        <option value="fahrenheit">Fahrenheit (°F)</option>
+                        <option value="celsius">Celsius (°C)</option>
+                        <option value="kelvin">Kelvin (K)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="convert-btn" class="convert-btn">Convert</button>
+
+            <div class="result-area" id="result-area">
+                <div class="result-value" id="result-value">--</div>
+                <br>
+                <div class="result-unit" id="result-unit">Unit</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tempInput = document.getElementById('temp-input');
+            const fromUnit = document.getElementById('from-unit');
+            const toUnit = document.getElementById('to-unit');
+            const convertBtn = document.getElementById('convert-btn');
+            const swapBtn = document.getElementById('swap-btn');
+            const resultArea = document.getElementById('result-area');
+            const resultValue = document.getElementById('result-value');
+            const resultUnit = document.getElementById('result-unit');
+            const errorMsg = document.getElementById('error-msg');
+
+            // Unit naming mappings
+            const unitNames = {
+                celsius: 'Celsius',
+                fahrenheit: 'Fahrenheit',
+                kelvin: 'Kelvin'
+            };
+
+            const unitSymbols = {
+                celsius: '°C',
+                fahrenheit: '°F',
+                kelvin: 'K'
+            };
+
+            // Swap units
+            swapBtn.addEventListener('click', () => {
+                const temp = fromUnit.value;
+                fromUnit.value = toUnit.value;
+                toUnit.value = temp;
+                
+                // Add a subtle rotation animation to the swap icon on click
+                const svg = swapBtn.querySelector('svg');
+                svg.style.transition = 'transform 0.3s ease';
+                svg.style.transform = `rotate(${svg.style.transform === 'rotate(180deg)' ? '0deg' : '180deg'})`;
+
+                // Optional: Trigger conversion on swap if input is not empty
+                if(tempInput.value !== '') {
+                    convertTemperature();
+                }
+            });
+
+            // Handle Enter key
+            tempInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    convertTemperature();
+                }
+            });
+
+            // Remove error class when typing
+            tempInput.addEventListener('input', () => {
+                errorMsg.classList.remove('visible');
+            });
+
+            // Main conversion trigger
+            convertBtn.addEventListener('click', convertTemperature);
+
+            function convertTemperature() {
+                const val = tempInput.value;
+                
+                // Validate input - checking for empty string or NaN
+                if (val === '' || isNaN(val)) {
+                    errorMsg.classList.add('visible');
+                    resultArea.classList.remove('visible');
+                    return;
+                }
+
+                errorMsg.classList.remove('visible');
+                
+                const inputValue = parseFloat(val);
+                const from = fromUnit.value;
+                const to = toUnit.value;
+                
+                let convertedValue = 0;
+
+                // Same unit
+                if (from === to) {
+                    convertedValue = inputValue;
+                } else {
+                    // First, convert everything to Celsius as a base intermediate
+                    let baseCelsius = 0;
+                    switch(from) {
+                        case 'celsius':
+                            baseCelsius = inputValue;
+                            break;
+                        case 'fahrenheit':
+                            baseCelsius = (inputValue - 32) * 5/9;
+                            break;
+                        case 'kelvin':
+                            baseCelsius = inputValue - 273.15;
+                            break;
+                    }
+
+                    // Next, convert from Celsius to target unit
+                    switch(to) {
+                        case 'celsius':
+                            convertedValue = baseCelsius;
+                            break;
+                        case 'fahrenheit':
+                            convertedValue = (baseCelsius * 9/5) + 32;
+                            break;
+                        case 'kelvin':
+                            convertedValue = baseCelsius + 273.15;
+                            break;
+                    }
+                }
+                // Display results with animation
+                displayResult(convertedValue, to);
+            }
+
+            function displayResult(value, to) {
+                // Round to 2 decimal places to avoid floating point weirdness
+                const roundedValue = Math.round(value * 100) / 100;
+                
+                // Animate out briefly before changing value, for a smoother update effect
+                if (resultArea.classList.contains('visible')) {
+                    resultArea.style.opacity = '0';
+                    setTimeout(() => {
+                        updateDOMAndReveal(roundedValue, to);
+                    }, 300);
+                } else {
+                    updateDOMAndReveal(roundedValue, to);
+                }
+            }
+
+            function updateDOMAndReveal(roundedValue, to) {
+                resultValue.textContent = `${roundedValue}${unitSymbols[to]}`;
+                resultUnit.textContent = `${unitNames[to]}`;
+                
+                resultArea.style.opacity = '1';
+                resultArea.classList.add('visible');
+            }
+        });
+    </script>
+</body>
+
+</html>
